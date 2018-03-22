@@ -46,27 +46,27 @@
 					ssh_key_file: .ssh/id_rsa
 
 - hosts: all
-  name: "Adding hosts list"
-  	include_vars: 
-  		dir: 'vars/'
- 			files_matching: 'hosts.yml'
-	
 	name: Copy SSH key to nodes
 			 	ssh_copy_id:
-			 		hostname: "{{item.host_name}}"
+			 		hostname: "{{item}}"
 			 		username: cephadm
 			 		password: changeme
 			 		ssh_public_key: "/home/cephadm/.ssh/id_rsa.pub"
+	with_items:
+		- manager
+		- node1
+		- node2
 
 - hosts: manager
 	tasks:
-			- name: Add cephadm as default ssh user
+			 name: Add cephadm as default ssh user
 				blockinfile:
 					path: /home/cephadm/.ssh/config
 					content: |
-						Host {{item.host_name}}
-								Hostname {{item.host_name}}
+						Host {{item}}
+								Hostname {{item}}
 								User cephadm
-
-
-				 
+				with_items:
+					- manager
+					- node1
+					- node2
