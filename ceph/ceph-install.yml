@@ -1,8 +1,3 @@
-- name: "Adding hosts list"
-  include_vars: 
-  		dir: 'vars/'
- 			files_matching: 'hosts.yml'
-
 - hosts: manager
 	tasks:
 			- name: Installing CEPH in Manager
