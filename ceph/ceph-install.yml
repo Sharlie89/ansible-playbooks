@@ -1,7 +1,7 @@
 - name: "Adding hosts list"
- include_vars: 
- 	file: hosts.yml
- 	name: hosts_file
+  include_vars: 
+ 			file: hosts.yml
+ 			name: hosts_file
 
 - hosts: manager
 	tasks:
@@ -38,11 +38,12 @@
 			 		line: '%cephadm ALL=(ALL) NOPASSWD: ALL'
 			 		validate: 'visudo -cf %s'
 
-- user:
+- hosts: manager
 	name: cephadm
-	generate_ssh_key: yes
-	ssh_key_bits: 2048
-	ssh_key_file: .ssh/id_rsa
+				user:
+					generate_ssh_key: yes
+					ssh_key_bits: 2048
+					ssh_key_file: .ssh/id_rsa
 
 - hosts: all
 			- name: Copy SSH key to nodes
@@ -55,4 +56,12 @@
 - hosts: manager
 	tasks:
 			- name: Add cephadm as default ssh user
+				blockinfile:
+					path: /home/cephadm/.ssh/config
+					content: |
+						Host {{item.host_name}}
+								Hostname {{item.host_name}}
+								User cephadm
+
+
 				 
