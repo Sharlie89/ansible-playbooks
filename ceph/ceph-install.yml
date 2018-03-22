@@ -1,7 +1,7 @@
 - name: "Adding hosts list"
   include_vars: 
- 			file: hosts.yml
- 			name: hosts_file
+  		dir: 'vars/'
+ 			files_matching: 'hosts.yml'
 
 - hosts: manager
 	tasks:
