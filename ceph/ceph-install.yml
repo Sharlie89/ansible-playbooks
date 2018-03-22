@@ -1,0 +1,58 @@
+- name: "Adding hosts list"
+ include_vars: 
+ 	file: hosts.yml
+ 	name: hosts_file
+
+- hosts: manager
+	tasks:
+			- name: Installing CEPH in Manager
+			 	apt:
+			 		update_cache: yes
+			 		name: ceph
+
+- hosts: all
+	tasks:
+			- name: Install chrony in Cluster
+			 	apt: 
+			 		update_cache: yes
+			 		name: chrony
+
+			- name: Execute sinchrony in Cluster
+			 	command: rpl "allow 1" "#allow 1" /etc/chrony/chrony.conf
+
+			- name: Create cephadm user
+			 	user:
+			 		name: cephadm
+			 		password: '$6$rGfOATGJ.$K4i0tbpvD9/.HM.HzHcEri/./yPPJkIXypYicWtM.Z9jZNgQkNjDZkuVf/oLtaGta3oiJRJVsSip1n4DkDr560'
+			 		groups:
+			 		 - sudo
+			 		state: present
+			 		shel: /bin/bash
+			 		system: no
+			 		createhome: yes
+			 		home: /home/cephadm
+			 	lineinfile:
+			 		dest: /etc/sudoers
+			 		state: present
+			 		regex: '^%cephadm'
+			 		line: '%cephadm ALL=(ALL) NOPASSWD: ALL'
+			 		validate: 'visudo -cf %s'
+
+- user:
+	name: cephadm
+	generate_ssh_key: yes
+	ssh_key_bits: 2048
+	ssh_key_file: .ssh/id_rsa
+
+- hosts: all
+			- name: Copy SSH key to nodes
+			 	ssh_copy_id:
+			 		hostname: "{{item.host_name}}"
+			 		username: cephadm
+			 		password: changeme
+			 		ssh_public_key: "/home/cephadm/.ssh/id_rsa.pub"
+
+- hosts: manager
+	tasks:
+			- name: Add cephadm as default ssh user
+				 
