@@ -1,12 +1,12 @@
 - name: Installing CEPH cluster
   hosts: manager
-  tasks:
   become: yes
   become_user: cephadm
-  file:
-   path: /home/cephadm/cluster
-   state: directory     
-   command: chdir=/home/cephadm/cluster ceph-deploy new cephadm
+  tasks:
+   file:
+    path: /home/cephadm/cluster
+    state: directory     
+    command: chdir=/home/cephadm/cluster ceph-deploy new cephadm
 
 - name: Deploy Ceph-cluster in all nodes
   hosts: manager
