@@ -3,19 +3,19 @@
   tasks:
   become: yes
   become_user: cephadm
-    file: 
-	path: /home/cephadm/cluster
-        state: directory     
-    command: chdir=/home/cephadm/cluster ceph-deploy new cephadm
+  file:
+   path: /home/cephadm/cluster
+   state: directory     
+   command: chdir=/home/cephadm/cluster ceph-deploy new cephadm
 
 - name: Deploy Ceph-cluster in all nodes
   hosts: manager
   become: yes
   become_user: cephadm
-  tasks: 
-    command: ceph-deploy install manager node1 node2
-    command: ceph-deploy mon create-initial  
-	
+  tasks:
+   command: ceph-deploy install manager node1 node2
+   command: ceph-deploy mon create-initial
+
 - name: Add disks to cluster
   hosts: manager
   become: yes
