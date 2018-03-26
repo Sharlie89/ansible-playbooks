@@ -1,0 +1,7 @@
+- name: Create FS on CEPH cluster
+  hosts: manager
+  tasks:
+   command: ceph osd pool create cephfs_data 128 & ceph osd create cephfs_metadata 128
+   become: yes
+   become_user: cephadm
+
