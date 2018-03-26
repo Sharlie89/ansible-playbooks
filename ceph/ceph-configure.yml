@@ -1,60 +1,60 @@
 - name: Installing CEPH cluster
   hosts: manager
-  become: yes
-  become_user: cephadm
   tasks:
    file:
     path: /home/cephadm/cluster
     state: directory     
     command: chdir=/home/cephadm/cluster ceph-deploy new cephadm
+   become: yes
+   become_user: cephadm
 
 - name: Deploy Ceph-cluster in all nodes
   hosts: manager
-  become: yes
-  become_user: cephadm
   tasks:
    command: ceph-deploy install manager node1 node2
    command: ceph-deploy mon create-initial
+   become: yes
+   become_user: cephadm
 
 - name: Add disks to cluster
   hosts: manager
-  become: yes
-  become_user: cephadm
   tasks:
    command: ceph-deploy disk zap "{{item}}":sdb
-  with_items:
+   become: yes
+   become_user: cephadm
+   with_items:
     - manager
     - node1
     - node2
 
 - name: Add disks to cluster
   hosts: manager
-  become: yes
-  become_user: cephadm
   tasks:
    command: ceph-deploy --overwrite-conf osd prepare "{{item}}":sdb 
-  with_items:
+   become: yes
+   become_user: cephadm
+   with_items:
     - manager
     - node1
     - node2
 
 - name: Add disks to cluster
   hosts: manager
-  become: yes
-  become_user: cephadm
   tasks:
    command: ceph-deploy osd activate "{{item}}":sdb1 
-  with_items:
+   become: yes
+   become_user: cephadm
+   with_items:
     - manager
     - node1
     - node2
 
 - name: Copy conf files to nodes
   hosts: all
-  become: yes
-  become_user: cephadm
   tasks:
-    command: ceph-deploy admin manager node1 node2
+   command: ceph-deploy admin manager node1 node2
+   become: yes
+   become_user: cephadm
 
 - name: Give read permissions to nodes
   hosts: all
@@ -65,14 +65,14 @@
 
 - name: Install Metadata Server for FS
   hosts: manager
-  become: yes
-  become_user: cephadm
   tasks: 
    command: ceph-deploy mds create cephadm
+   become: yes
+   become_user: cephadm
 
 - name: Install Rados Gateway for Object Gateway
   hosts: manager
-  become: yes
-  become_user: cephadm
   tasks:
    command: ceph-deploy rgw create cehpadm
+   become: yes
+   become_user: cephadm
