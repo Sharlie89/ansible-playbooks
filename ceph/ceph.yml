@@ -1,3 +1,4 @@
+- hosts: manager
 - name: Start install phase
 - include: ceph-install.yml
 
