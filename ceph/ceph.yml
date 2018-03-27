@@ -1,14 +1,8 @@
 - name: Start install phase
-  hosts: manager
-  tasks: 
-   import_playbook: ceph-install.yml
+- include: ceph-install.yml
 
 - name: Start configure phase
-  hosts: manager
-  tasks: 
-   import_playbook: ceph-configure.yml
+- include: ceph-configure.yml
 
 - name: Start deploy phase
-  hosts: manager
-  tasks: 
-   import_playbook: ceph-deploy.yml
+- include: ceph-deploy.yml
