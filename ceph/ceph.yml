@@ -1,0 +1,14 @@
+- name: Start install phase
+  hosts: manager
+  tasks: 
+   include_tasks: ceph-install.yml
+
+- name: Start configure phase
+  hosts: manager
+  tasks: 
+   include_tasks: ceph-configure.yml
+
+- name: Start deploy phase
+  hosts: manager
+  tasks: 
+   include_tasks: ceph-deploy.yml
