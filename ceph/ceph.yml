@@ -1,9 +1,11 @@
-- hosts: manager
 - name: Start install phase
+  hosts: manager
 - include: ceph-install.yml
 
 - name: Start configure phase
+  hosts: manager
 - include: ceph-configure.yml
 
 - name: Start deploy phase
+  hosts: manager
 - include: ceph-deploy.yml
