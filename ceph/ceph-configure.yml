@@ -76,3 +76,11 @@
    command: ceph-deploy rgw create cehpadm
    become: yes
    become_user: cephadm
+
+- name: Create fstab entry for automount
+  hosts: all
+  tasks:
+   command: RES=`mount | grep osd | awk '{print $3}'`; echo "/dev/sdb1 $RES  xfs rw,noatime,attr2,inode64,noquota        0 
+
+
+

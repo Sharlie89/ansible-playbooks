@@ -5,3 +5,13 @@
    become: yes
    become_user: cephadm
 
+- name: Format CEPH cluster
+  hosts: manager
+  tasks:
+   command: ceph fs new cephfs cephfs_data cephfs_metadata
+   become: yes
+   become_user: cephadm
+
+
+
+
