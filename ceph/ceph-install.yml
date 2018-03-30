@@ -1,16 +1,14 @@
 - name: Installing CEPH in Manager
   hosts: manager
-  tasks:
-    apt:
-     update_cache: yes
-     name: ceph
+  apt:
+   update_cache: yes
+   name: ceph
 
 - name: Install chrony in Cluster
   hosts: all
-  tasks:
-    apt: 
-     update_cache: yes
-     name: chrony
+  apt: 
+   update_cache: yes
+   name: chrony
 
 - name: Execute sinchrony in Cluster
   hosts: all
