@@ -1,14 +1,12 @@
 - name: Installing CEPH in Manager
-  tags: 
-   - always
   hosts: all
   tasks:
-   raw: apt install -y ceph
+   apt: name=ceph state=present
 
 - name: Install chrony in Cluster
   hosts: all
   tasks:
-   raw: apt install -y chrony
+   apt: name=chrony state=present
 
 - name: Execute sinchrony in Cluster
   hosts: all
