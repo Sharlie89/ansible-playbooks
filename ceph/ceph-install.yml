@@ -1,17 +1,17 @@
 - name: Installing CEPH in Manager
-hosts: all
-tasks:
-apt name=ceph state=present
+ hosts: all
+ tasks:
+  apt name=ceph state=present
 
 - name: Install chrony in Cluster
-hosts: all
-tasks:
-apt: pkg=chrony state=present
+ hosts: all
+ tasks:
+  apt: pkg=chrony state=present
 
 - name: Execute sinchrony in Cluster
-  hosts: all
-  tasks:
-   command: rpl "allow 1" "#allow 1" /etc/chrony/chrony.conf
+ hosts: all
+ tasks:
+  command: rpl "allow 1" "#allow 1" /etc/chrony/chrony.conf
 
 - name: Create cephadm user
   hosts: all
