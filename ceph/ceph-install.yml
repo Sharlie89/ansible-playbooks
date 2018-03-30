@@ -1,10 +1,12 @@
 - name: Installing CEPH in Manager
   hosts: all
-  raw: apt install -y ceph
+  tasks:
+   raw: apt install -y ceph
 
 - name: Install chrony in Cluster
   hosts: all
-  raw: apt install -y chrony
+  tasks:
+   raw: apt install -y chrony
 
 - name: Execute sinchrony in Cluster
   hosts: all
