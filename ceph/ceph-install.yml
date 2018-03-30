@@ -1,7 +1,6 @@
-tags: 
- - always
-
 - name: Installing CEPH in Manager
+  tags: 
+   - always
   hosts: all
   tasks:
    raw: apt install -y ceph
