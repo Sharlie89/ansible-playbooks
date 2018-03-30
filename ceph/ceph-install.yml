@@ -1,12 +1,12 @@
 - name: Installing CEPH in Manager
   hosts: all
   tasks:
-   apt: name=ceph state=present
+  action: apt pkg=ceph state=present
 
 - name: Install chrony in Cluster
   hosts: all
   tasks:
-   apt: name=chrony state=present
+   action: apt pkg=chrony state=present
 
 - name: Execute sinchrony in Cluster
   hosts: all
