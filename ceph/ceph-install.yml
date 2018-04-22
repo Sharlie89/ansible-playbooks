@@ -1,69 +1,81 @@
-- name: Installing CEPH in Manager
- hosts: all
- tasks:
-  apt name=ceph state=present
-
-- name: Install chrony in Cluster
- hosts: all
- tasks:
-  apt: pkg=chrony state=present
-
-- name: Execute sinchrony in Cluster
- hosts: all
- tasks:
-  command: rpl "allow 1" "#allow 1" /etc/chrony/chrony.conf
-
-- name: Create cephadm user
-  hosts: all
+- hosts: all
+  name: Installing CEPH in Manager
   tasks:
-   user:
-    name: cephadm
-    password: '$6$rGfOATGJ.$K4i0tbpvD9/.HM.HzHcEri/./yPPJkIXypYicWtM.Z9jZNgQkNjDZkuVf/oLtaGta3oiJRJVsSip1n4DkDr560'
-    groups:
-     - sudo
-    state: present
-    shell: /bin/bash
-    system: no
-    createhome: yes
-    home: /home/cephadm
-   lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regex: '^%cephadm'
-    line: '%cephadm ALL=(ALL) NOPASSWD: ALL'
-    validate: 'visudo -cf %s'
+   - apt: name=ceph default_release=jessie-backports
 
-- name: cephadm
-  hosts: manager
+- hosts: all
+  name: Install chrony in Cluster  
   tasks:
-   user:
-    generate_ssh_key: yes
-    ssh_key_bits: 2048
-    ssh_key_file: .ssh/id_rsa
+   - apt: name=chrony default_release=jessie-backports
 
-- name: Copy SSH key to nodes
-  hosts: all
+- hosts: all
+  name: Install rpl in Cluster  
   tasks:
-   ssh_copy_id:
-    hostname: "{{item}}"
-    username: cephadm
-    password: changeme
-    ssh_public_key: "/home/cephadm/.ssh/id_rsa.pub"
-   with_items:
-    - manager
-    - node1
-    - node2
+   - apt: name=rpl 
 
-- name: Add cephadm as default ssh user
-  hosts: manager
+- hosts: all
+  name: Execute sinchrony in Cluster
   tasks:
-   blockinfile:
-    path: /home/cephadm/.ssh/config
-    content: |
-     Host {{item}}
-     Hostname {{item}}
-     User cephadm
-   with_items:
-    - manager
-    - node1
-    - node2
+   - command: 'rpl "allow 1" "#allow 1" /etc/chrony/chrony.conf'
+
+- hosts: all
+  name: Create cephadm user
+  tasks:
+   - user:
+      name: cephadm
+      password: '$6$rGfOATGJ.$K4i0tbpvD9/.HM.HzHcEri/./yPPJkIXypYicWtM.Z9jZNgQkNjDZkuVf/oLtaGta3oiJRJVsSip1n4DkDr560'
+      groups:
+       - sudo
+      state: present
+      shell: /bin/bash
+      system: no
+      createhome: yes
+      home: /home/cephadm
+
+- hosts: all
+  name: allow sudo to cephadm
+  tasks:
+   - lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%cephadm'
+      line: '%cephadm ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+- hosts: manager
+  name: cephadm ssh-key generation
+  tasks:
+   - user:
+      name: cephadm
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa
+
+- hosts: all
+  name: Copy SSH key to nodes
+  tasks:
+   - authorized_key:
+      user: cephadm
+      state: present
+      key: "{{ lookup('file', '/home/cephadm/.ssh/id_rsa.pub') }}"
+
+- hosts: manager
+  name: Create config file in .ssh
+  tasks:
+  - file:
+     path: /home/cephadm/.ssh/config
+     state: touch
+     mode: "u=rwx,g=r,o=r"
+     owner: cephadm
+     group: cephadm
+
+- hosts: manager
+  name: Add cephadm as default ssh user
+  tasks:
+   - lineinfile:
+      dest: /home/cephadm/.ssh/config
+      line: "Host {{ item.name }} \n Hostname {{ item.name }} \n User cephadm"
+     with_items:
+      - { name: manager }
+      - { name: node1 }
+      - { name: node2 }

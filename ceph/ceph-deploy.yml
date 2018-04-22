@@ -1,17 +1,27 @@
-- name: Create FS on CEPH cluster
-  hosts: manager
+- hosts: all
+  name: Restart CEPH service
   tasks:
-   command: ceph osd pool create cephfs_data 128 & ceph osd create cephfs_metadata 128
-   become: yes
-   become_user: cephadm
+   - service: 
+      name: ceph
+      state: restarted
 
-- name: Format CEPH cluster
-  hosts: manager
+- hosts: manager 
+  name: Create FS on CEPH cluster
+  become: yes
+  become_user: cephadm
   tasks:
-   command: ceph fs new cephfs cephfs_data cephfs_metadata
-   become: yes
-   become_user: cephadm
+   - command: ceph osd pool create cephfs_data 128
 
+- hosts: manager 
+  name: Create metadata on CEPH cluster
+  become: yes
+  become_user: cephadm
+  tasks:
+   - command: ceph osd create cephfs_metadata 128
 
-
-
+- hosts: manager
+  name: Format CEPH cluster
+  become: yes
+  become_user: cephadm
+  tasks:
+   - command: ceph fs new cephfs cephfs_data cephfs_metadata

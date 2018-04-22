@@ -1,86 +1,128 @@
-- name: Installing CEPH cluster
-  hosts: manager
+- hosts: manager
+  name: Creating CEPH cluster directory
+  become: yes
+  become_user: cephadm
   tasks:
-   file:
-    path: /home/cephadm/cluster
-    state: directory     
-    command: chdir=/home/cephadm/cluster ceph-deploy new cephadm
-   become: yes
-   become_user: cephadm
+   - file:
+      path: /home/cephadm/cluster
+      state: directory     
+      mode: 0755
 
-- name: Deploy Ceph-cluster in all nodes
-  hosts: manager
+- hosts: manager
+  name: Installing ceph-deploy
   tasks:
-   command: ceph-deploy install manager node1 node2
-   command: ceph-deploy mon create-initial
-   become: yes
-   become_user: cephadm
+   - apt: name=ceph-deploy default_release=jessie-backports
 
-- name: Add disks to cluster
-  hosts: manager
+- hosts: all
+  name: Installing ceph-deploy
   tasks:
-   command: ceph-deploy disk zap "{{item}}":sdb
-   become: yes
-   become_user: cephadm
-   with_items:
-    - manager
-    - node1
-    - node2
+   - apt: name=radosgw default_release=jessie-backports
 
-- name: Add disks to cluster
-  hosts: manager
+- hosts: manager
+  name: Installing CEPH cluster
+  become: yes
+  become_user: cephadm
   tasks:
-   command: ceph-deploy --overwrite-conf osd prepare "{{item}}":sdb 
-   become: yes
-   become_user: cephadm
-   with_items:
-    - manager
-    - node1
-    - node2
+   - shell: ceph-deploy --overwrite-conf new manager
+     args: 
+      chdir: /home/cephadm/cluster   
 
-- name: Add disks to cluster
-  hosts: manager
+- hosts: manager
+  name: Deploy Ceph-cluster in all nodes
+  become: yes
+  become_user: cephadm
   tasks:
-   command: ceph-deploy osd activate "{{item}}":sdb1 
-   become: yes
-   become_user: cephadm
-   with_items:
-    - manager
-    - node1
-    - node2
+   - shell: ceph-deploy --overwrite-conf install manager node1 node2
+     args:
+      chdir: /home/cephadm/cluster
+      warn: yes
 
-- name: Copy conf files to nodes
-  hosts: all
+- hosts: manager
+  name: Deploy2 Ceph-cluster in all nodes
+  become: yes
+  become_user: cephadm
   tasks:
-   command: ceph-deploy admin manager node1 node2
-   become: yes
-   become_user: cephadm
+   - shell: ceph-deploy mon create-initial
+     args:
+      chdir: /home/cephadm/cluster
 
-- name: Give read permissions to nodes
-  hosts: all
+- hosts: manager
+  name: Add disks to cluster
+  become: yes
+  become_user: cephadm
   tasks:
-   file: 
-    src: /etc/ceph/ceph.client.admin.keyring
-    mode: "u+r,g+r,o+r"
+   - shell: ceph-deploy disk zap {{ item }} sdb
+     args:
+      chdir: /home/cephadm/cluster
+     with_items:
+      - manager
+      - node1
+      - node2
 
-- name: Install Metadata Server for FS
-  hosts: manager
+- hosts: manager
+  name: Add disks to cluster 2
+  become: yes
+  become_user: cephadm
+  tasks:
+   - shell: ceph-deploy --overwrite-conf osd prepare {{ item }} sdb 
+     args:
+      chdir: /home/cephadm/cluster
+     with_items:
+      - manager
+      - node1
+      - node2
+
+- hosts: manager
+  name: Add disks to cluster 3
+  become: yes
+  become_user: cephadm
+  tasks:
+   - shell: ceph-deploy osd activate {{ item }} sdb1 
+     args:
+      chdir: /home/cephadm/cluster
+     with_items:
+      - manager
+      - node1
+      - node2
+
+- hosts: all
+  name: Copy conf files to nodes
+  become: yes
+  become_user: cephadm
+  tasks:
+    - shell: ceph-deploy admin manager node1 node2
+      args:
+       chdir: /home/cephadm/cluster
+- hosts: all
+  name: Give read permissions to nodes
+  tasks:
+   - file: 
+      src: /etc/ceph/ceph.client.admin.keyring
+      mode: "u+r,g+r,o+r"
+
+- hosts: manager
+  name: Install Metadata Server for FS
+  become: yes
+  become_user: cephadm
   tasks: 
-   command: ceph-deploy mds create cephadm
-   become: yes
-   become_user: cephadm
+   - shell: ceph-deploy mds create cephadm
+     args:
+      chdir: /home/cephadm/cluster
 
-- name: Install Rados Gateway for Object Gateway
-  hosts: manager
+- hosts: manager
+  name: Install Rados Gateway for Object Gateway
+  become: yes
+  become_user: cephadm
   tasks:
-   command: ceph-deploy rgw create cehpadm
-   become: yes
-   become_user: cephadm
+   - shell: ceph-deploy rgw create cehpadm
+     args:
+      chdir: /home/cephadm/cluster
 
-- name: Create fstab entry for automount
-  hosts: all
+- hosts: all
+  name: Create fstab entry for automount
   tasks:
-   command: RES=`mount | grep osd | awk '{print $3}'`; echo "/dev/sdb1 $RES  xfs rw,noatime,attr2,inode64,noquota        0 
-
+   - shell: "RES=`mount | grep osd | awk '{print $3}'`"
+     register: RES
+   - shell: echo /dev/sdb1 $RES  xfs rw,noatime,attr2,inode64,noquota        0
 
 
